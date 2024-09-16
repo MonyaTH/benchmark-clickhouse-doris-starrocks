@@ -1,0 +1,61 @@
+•	cluster_clickhouse:
+  o	benchmark:
+    	create.sql: script con la creación de las tablas e ingesta de datos.
+    	queries.sql: script con las consultas sin JOIN.
+    	join_queries.sql: script con las consultas JOIN.
+    	result_X.csv: ficheros con los resultados de las pruebas de consultas sin JOIN para el volumen X.
+    	join_result_X.csv: ficheros con los resultados de las pruebas de consultas con JOIN para el volumen X.
+    	run.sh: script para almacenar los resultados en fichero CSV.
+    	test.sql: script para comprobar número de registros en las tablas. 
+  o	cluster: ficheros de configuración del clúster de ClickHouse. 
+  o	config_clickhouse.sql: fichero con los pasos a seguir para configurar el clúster. 
+  o	docker-compose.yml
+
+•	cluster_doris:
+  o	benchmark:
+    	create.sql: script con la creación de las tablas e ingesta de datos.
+    	queries.sql: script con las consultas sin JOIN.
+    	join_queries.sql: script con las consultas JOIN.
+    	result_X.csv: ficheros con los resultados de las pruebas de consultas sin JOIN para el volumen X.
+    	join_result_X.csv: ficheros con los resultados de las pruebas de consultas con JOIN para el volumen X.
+    	run.sh: script para almacenar los resultados en fichero CSV.
+    	test.sql: script para comprobar número de registros en las tablas. 
+  o	cluster:
+    	be-1: directorio para almacenamiento de información del nodo be-1.
+    	be-2: directorio para almacenamiento de información del nodo be-2.
+    	be-3: directorio para almacenamiento de información del nodo be-3.
+    	fe: directorio para almacenamiento de información del nodo fe.
+  o	config_doris.sql: fichero con los pasos a seguir para configurar el clúster. 
+  o	docker-compose.yml
+  o	prometheus.yml: fichero con la configuración de prometheus.
+  o	dashboard_doris.json: fichero con el dashboard de uso de recursos de Grafana.
+
+•	cluster_starrocks:
+  o	benchmark:
+    	create.sql: script con la creación de las tablas e ingesta de datos.
+    	queries.sql: script con las consultas sin JOIN.
+    	join_queries.sql: script con las consultas JOIN.
+    	result_X.csv: ficheros con los resultados de las pruebas de consultas sin JOIN para el volumen X.
+    	join_result_X.csv: ficheros con los resultados de las pruebas de consultas con JOIN para el volumen X.
+    	run.sh: script para almacenar los resultados en fichero CSV.
+    	test.sql: script para comprobar número de registros en las tablas. 
+  o	cluster:
+    	be-1: directorio para almacenamiento de información del nodo be-1.
+    	be-2: directorio para almacenamiento de información del nodo be-2.
+    	be-3: directorio para almacenamiento de información del nodo be-3.
+    	fe: directorio para almacenamiento de información del nodo fe.
+  o	config_starrocks.sql: fichero con los pasos a seguir para configurar el clúster. 
+  o	docker-compose.yml
+  o	prometheus.yml: fichero con la configuración de prometheus.
+  o	dashboard_starrocks.json: fichero con el dashboard de uso de recursos de Grafana.
+
+•	connectors: 
+  o	crearConectores.bat: script para la creación de los conectores. Se debe ejecutar antes de la creación de las tablas.
+  o	crearConector_shoe_clickstream.ps1: conector para el topic shoe_clickstream.
+  o	crearConector_shoe_customers.ps1: conector para el topic shoe_customers.
+  o	crearConector_shoe_orders.ps1: conector para el topic shoe_orders.
+  o	crearConector_shoes.ps1: conector para el topic shoes.
+
+•	README
+
+•	resultados.csv: fichero con los resultados. 
