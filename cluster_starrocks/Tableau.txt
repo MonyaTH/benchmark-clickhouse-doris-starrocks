@@ -1,0 +1,25 @@
+Pasos seguidos para conectar Starrocks con Tableau:
+
+1. Descargar el conector JDBC de MySQL:
+https://dev.mysql.com/downloads/connector/j/
+
+
+2. Colocar el archivo jar en el directorio adecuado:
+
+Mac: /Users/<name>/Library/Tableau/Drivers
+Windows: C:\Program Files\Tableau\Drivers
+
+3. Crear el archivo TDC starrocks_jdbc.tdc con el siguiente contenido y colocarlo en el directorio C:\Program Files\Tableau\Tableau 2024.1\defaults\Datasources:
+
+<?xml version='1.0' encoding='utf-8' ?>
+<connection-customization class='genericjdbc' enabled='true' version='99.9'>
+  <vendor name='genericjdbc' />
+  <driver name='mysql' />
+  <customizations>
+    <customization name='CAP_QUERY_HAVING_REQUIRES_GROUP_BY' value='yes' />
+  </customizations>
+</connection-customization>
+
+4. Seleccionar "Other Databases (JDBC)" en Tableau para conectar Starrocks.
+5. Ingresar la URL, seleccionar el dialecto MySQL, y proporcionar las credenciales:
+jdbc:mysql://localhost:9030/test

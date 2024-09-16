@@ -1,0 +1,229 @@
+
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - kafka_net
+      
+  kafka:
+    image: confluentinc/cp-server:7.6.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+      - "9101:9101"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: kafka:29092
+      CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+      CONFLUENT_METRICS_ENABLE: 'true'
+      CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+    networks:
+      kafka_net:
+      clickhouse_net:
+        ipv4_address: 172.20.0.10
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.0
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    networks:
+      - kafka_net
+
+  connect:
+    image: cnfldemos/cp-server-connect-datagen:0.6.2-7.5.0
+    hostname: connect
+    container_name: connect
+    depends_on:
+      - zookeeper
+      - kafka
+    ports:
+      - "8083:8083"
+    networks:
+      - kafka_net
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:29092
+      CONNECT_REST_PORT: 8083
+      CONNECT_REST_ADVERTISED_HOST_NAME: connect
+      CONNECT_GROUP_ID: compose-connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_FLUSH_INTERVAL_MS: 10000
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_ZOOKEEPER_CONNECT: zookeeper:2181
+     # CONNECT_PLUGIN_PATH: /usr/share/java
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-7.6.0.jar
+     # CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+     # CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_LOGGERS: "org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR"
+  
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:7.6.0
+    hostname: control-center
+    container_name: control-center
+    depends_on:
+      - kafka
+      - schema-registry
+      - connect
+    ports:
+      - "9021:9021"
+    networks:
+      - kafka_net
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'kafka:29092'
+      CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: 'connect:8083'
+      CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 1
+      CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
+      CONFLUENT_METRICS_TOPIC_REPLICATION: 1
+      PORT: 9021
+
+  clickhouse01:
+    image: clickhouse/clickhouse-server:23.5.2.7-alpine
+    hostname: clickhouse01
+    container_name: clickhouse01
+    ports:
+      - 9001:9000
+      - 8124:8123
+      - 2182:2181
+      - 9445:9444
+    networks:
+      clickhouse_net:
+        ipv4_address: 172.20.0.2
+    deploy:
+      resources:
+        limits:
+          cpus: '16.0'       
+          memory: 16G
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOOKEEPER_CLIENT_PORT=2181
+    extra_hosts:
+      - "clickhouse02:172.20.0.3"
+      - "clickhouse03:172.20.0.4"
+    restart: always
+    volumes:
+      - ./cluster/config.xml:/etc/clickhouse-server/config.xml
+      - ./cluster/clusters.xml:/etc/clickhouse-server/config.d/clusters.xml
+      - ./cluster/listen_host.xml:/etc/clickhouse-server/config.d/listen_host.xml
+      - ./cluster/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./cluster/macros_1.xml:/etc/clickhouse-server/config.d/macros.xml
+      - ./cluster/keeper_1.xml:/etc/clickhouse-server/config.d/keeper.xml
+      - ./benchmark/:/benchmark
+    privileged: true
+
+  clickhouse02:
+    image: clickhouse/clickhouse-server:23.5.2.7-alpine
+    hostname: clickhouse02
+    container_name: clickhouse02
+    ports:
+      - 9002:9000
+      - 8125:8123
+      - 2183:2181
+      - 9446:9444
+    networks:
+      clickhouse_net:
+        ipv4_address: 172.20.0.3
+    deploy:
+      resources:
+        limits:
+          cpus: '16.0'       
+          memory: 16G
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOOKEEPER_CLIENT_PORT=2181
+    extra_hosts:
+      - "clickhouse01:172.20.0.2"
+      - "clickhouse03:172.20.0.4"
+    restart: always
+    volumes:
+      - ./cluster/config.xml:/etc/clickhouse-server/config.xml
+      - ./cluster/clusters.xml:/etc/clickhouse-server/config.d/clusters.xml
+      - ./cluster/listen_host.xml:/etc/clickhouse-server/config.d/listen_host.xml
+      - ./cluster/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./cluster/macros_2.xml:/etc/clickhouse-server/config.d/macros.xml
+      - ./cluster/keeper_2.xml:/etc/clickhouse-server/config.d/keeper.xml
+
+  clickhouse03:
+    image: clickhouse/clickhouse-server:23.5.2.7-alpine
+    hostname: clickhouse03
+    container_name: clickhouse03
+    ports:
+      - 9003:9000
+      - 8126:8123
+      - 2184:2181
+      - 9447:9444
+    networks:
+      clickhouse_net:
+        ipv4_address: 172.20.0.4
+    deploy:
+      resources:
+        limits:
+          cpus: '16.0'       
+          memory: 16G
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+      - ZOOKEEPER_CLIENT_PORT=2181
+    extra_hosts:
+      - "clickhouse01:172.20.0.2"
+      - "clickhouse02:172.20.0.3"
+    restart: always
+    volumes:
+      - ./cluster/config.xml:/etc/clickhouse-server/config.xml
+      - ./cluster/clusters.xml:/etc/clickhouse-server/config.d/clusters.xml
+      - ./cluster/listen_host.xml:/etc/clickhouse-server/config.d/listen_host.xml
+      - ./cluster/zookeeper.xml:/etc/clickhouse-server/config.d/zookeeper.xml
+      - ./cluster/keeper_3.xml:/etc/clickhouse-server/config.d/keeper.xml
+      - ./cluster/macros_3.xml:/etc/clickhouse-server/config.d/macros.xml
+
+
+
+networks:
+  kafka_net:
+    driver: bridge
+  clickhouse_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

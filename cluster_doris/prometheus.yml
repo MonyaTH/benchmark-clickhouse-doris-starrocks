@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 15s # Intervalo de scrapeo
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'doris_fe'
+    static_configs:
+      - targets: ['172.19.0.198:8030'] # Puerto de métricas del FE
+
+  - job_name: 'doris_be'
+    static_configs:
+      - targets: 
+          - '172.19.0.199:8040' # Puerto de métricas del BE-1
+          - '172.19.0.200:8040' # Puerto de métricas del BE-2
+          - '172.19.0.201:8040' # Puerto de métricas del BE-3
+

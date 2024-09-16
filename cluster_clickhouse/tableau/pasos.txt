@@ -1,0 +1,23 @@
+1. Instalar el conector clickhouse-tableau-connector-jdbc:
+
+https://github.com/ClickHouse/clickhouse-tableau-connector-jdbc/releases
+
+2. Guardarlo en el directorio siguiente:
+
+macOS: ~/Documents/My Tableau Repository/Connectors
+Windows: C:\Users[Windows User]\Documents\My Tableau Repository\Connectors
+
+
+3. Instalar el driver JDBC compatible con el conector anterior. Para este caso es el siguiente (instalar el fichero jar clickhouse-jdbc-x.x.x-shaded.jar):
+
+https://github.com/ClickHouse/clickhouse-java/releases/tag/v0.4.6
+
+4. Guardar el fichero jar anterior en el siguiente directorio:
+macOS: ~/Library/Tableau/Drivers
+Windows: C:\Program Files\Tableau\Drivers
+
+5. Ir a Tableau y seleccionar el conector ClickHouse JDBC by ClickHouse, Inc.
+6. Indicar los detalles de conexión.
+7. Listo, a visualizar!
+
+

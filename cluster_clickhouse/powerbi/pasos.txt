@@ -1,0 +1,17 @@
+1. Instalar el conector nativo de ClickHouse (archivo .mez):
+https://github.com/ClickHouse/power-bi-clickhouse/releases
+
+
+2. Crear el directorio para almacenar el conector:
+"[Documents]\Power BI Desktop\Custom Connectors"
+
+3. En Power BI, activar la siguiente opción:
+File -> Options and settings -> Options -> Security -> Data Extensions -> Allow any extension to load without warning or validation
+
+4. Reiniciar Power BI.
+
+5. En Power BI, en Obtener datos seleccionar el conector ClickHouseConnector (beta).
+
+6. Introducir los detalles de conexión.
+
+7. Listo. 

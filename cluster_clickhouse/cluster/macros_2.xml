@@ -1,0 +1,8 @@
+<yandex>
+    <macros>
+       <cluster>cluster_3S_1R</cluster>
+       <shard>2</shard>
+       <replica>clickhouse02</replica>
+    </macros>
+</yandex>
+

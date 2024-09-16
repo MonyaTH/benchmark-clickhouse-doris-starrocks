@@ -1,0 +1,15 @@
+1. Instalar el driver ODBC para MySQL (instalar la versión 5.x para evitar problemas de incompatibilidad):
+
+https://downloads.mysql.com/archives/c-odbc/
+
+
+2. Buscar ODBC en el menú de inicio de Windows para configurar un nuevo DNS.
+
+3. Seleccionar DNS de sistema y seleccionar el controlador recientemente instalado.
+
+
+4. Cubrir los detalles de conexión.
+
+5. En Tableau, seleccionar MySQL y cubrir los detalles de conexión.
+
+6. Y por último, seleccionar las tablas deseadas y comenzar a visualizar. 

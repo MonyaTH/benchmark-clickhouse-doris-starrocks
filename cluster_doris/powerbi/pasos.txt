@@ -1,0 +1,6 @@
+1. En Power BI, en Obtener datos, seleccionar MySQL.
+2. Si no se dispone del conector de MySQL, instalarlo.
+3. Introducir los datos de conexión. 
+4. Seleccionar la opción Base de datos. 
+5. Cargar los datos. 
+6. Listo. 

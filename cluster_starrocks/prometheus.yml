@@ -1,0 +1,17 @@
+global:
+  scrape_interval: 15s # Intervalo de scrapeo
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'starrocks_fe'
+    static_configs:
+      - targets: ['10.5.0.2:8030'] # Puerto de métricas del FE
+
+  - job_name: 'starrocks_be'
+    static_configs:
+      - targets: 
+          - '10.5.0.3:8040' # Puerto de métricas del BE-1
+          - '10.5.0.4:8040' # Puerto de métricas del BE-2
+          - '10.5.0.5:8040' # Puerto de métricas del BE-3
+
+# Agrega otros scrape_configs para monitorear Kafka, Zookeeper, y otros servicios si es necesario.
